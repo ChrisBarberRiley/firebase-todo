@@ -5,6 +5,7 @@ import {
   InputLabel,
   List,
 } from '@material-ui/core';
+import firebase from 'firebase';
 import { useEffect, useState } from 'react';
 import './App.css';
 import { db } from './firebase';
@@ -16,9 +17,11 @@ function App() {
 
   // fetch all todos from database
   useEffect(() => {
-    db.collection('todos').onSnapshot((snapshot) => {
-      setTodos(snapshot.docs.map((doc) => doc.data().todo));
-    });
+    db.collection('todos')
+      .orderBy('timestamp', 'desc')
+      .onSnapshot((snapshot) => {
+        setTodos(snapshot.docs.map((doc) => doc.data().todo));
+      });
   }, []);
 
   const addTodo = (e) => {
@@ -26,6 +29,7 @@ function App() {
 
     db.collection('todos').add({
       todo: input,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     });
 
     setInput('');
